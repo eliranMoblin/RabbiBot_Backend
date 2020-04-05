@@ -181,3 +181,141 @@ app {
         display: block;
     }
 }
+
+
+html, body{
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+#camera, #camera--view, #camera--sensor, #camera--output {
+    position: fixed;
+
+    /*height: 100%;
+    width: 100%;*/
+    object-fit: cover;
+}
+
+#camera--view, #camera--sensor, #camera--output{
+    /*transform: scaleX(-1);*/
+    filter: FlipH;
+}
+
+
+    /*#camera--sensor:after {
+    box-shadow: 0 5px 10px 0 rgba(0,0,0,1);
+    clip-path: polygon(0% 0%, 0% 100%, 25% 100%, 25% 25%, 85% 25%, 85% 85%, 25% 85%, 25% 100%, 100% 100%, 100% 0%);
+}*/
+    #camera--trigger {
+        width: 200px;
+        background-color: black;
+        color: white;
+        font-size: 16px;
+        border-radius: 30px;
+        border: none;
+        padding: 15px 20px;
+        text-align: center;
+        box-shadow: 0 5px 10px 0 rgba(0,0,0,0.2);
+        position: fixed;
+        bottom: 30px;
+        left: calc(50% - 100px);
+    }
+
+#flip-btn{
+    width: 200px;
+    background-color: black;
+    color: white;
+    font-size: 16px;
+    border-radius: 30px;
+    border: none;
+    padding: 15px 20px;
+    text-align: center;
+    box-shadow: 0 5px 10px 0 rgba(0,0,0,0.2);
+    position: fixed;
+    bottom: 30px;
+    left: calc(30% - 100px);
+}
+
+.taken{
+    height: 100px!important;
+    width: 100px!important;
+    transition: all 0.5s ease-in;
+    border: solid 3px white;
+    box-shadow: 0 5px 10px 0 rgba(0,0,0,0.2);
+    top: 20px;
+    right: 20px;
+    z-index: 2;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/*.display {
+    position: relative;
+}*/
+
+video {
+    display: block;
+    /*transform: scaleX(-1);*/
+}
+
+canvas {
+    display: block;
+    position: absolute;
+    top: 0;
+    pointer-events: none; /* Prevents canvas from intercepting clicks */
+    /*transform: scaleX(-1);*/
+}
+
+.ui {
+    margin-top: 10px;
+    width: 640px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.ui .controls {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    border: 1px solid gray;
+    box-sizing: border-box;
+    padding: 0 15px;
+    flex-grow: 1;
+}
+
+.controls {
+    display: none;
+}
+.ui .controls p {
+    margin-top: 0;
+}
+
+.ui #color {
+    box-sizing: border-box;
+    background-color: white;
+    width: 100px;
+    height: 100px;
+    border: 1px solid gray;
+    margin-left: 10px;
+}
+
+.controls div {
+    display: flex;
+}
+
+.controls div label {
+    width: 25%;
+}
+
+.controls div input {
+    width: 100%;
+}
+

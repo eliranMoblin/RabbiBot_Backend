@@ -1,0 +1,281 @@
+﻿@page "/Edit/{Id}"
+@using System.Collections
+@using System.Drawing
+@using Entity
+@using RabbiBot_Backend.Data
+@using Blazor.Extensions
+@using ValidationSummary = Microsoft.AspNetCore.Components.Forms.ValidationSummary
+@inject IJSRuntime JsRuntime
+
+
+@inject ImagesService ImagesService
+@inject Microsoft.AspNetCore.Components.NavigationManager navigationManager
+
+<div class="row">
+    <div class="col-md-4">
+        <form>
+            <div class="form-group">
+                <label for="Name" class="control-label">Name</label>
+                <input for="Name" class="form-control" @bind-value="@imageEntity.Id" />
+                <input type="hidden" @bind-value="@imageEntity.Url" />
+            </div>
+            <div class="form-group">
+                <label for="Color" class="control-label">Color</label>
+                <input for="Color" class="form-control" @bind-value="@imageEntity.Colors" />
+            </div>
+
+            <div class="form-group">
+                <label for="Color" class="control-label">Image</label>
+                <input for="Color" class="form-control" @bind-value="@imageEntity.Url" />
+                <img id="webcam" src="@imageEntity.Url" crossorigin="anonymous" class="img-fluid" />
+                <canvas id="canvas" width="640" height="480"></canvas>
+                <div class="ui">
+
+                    <div class="controls" style="display: none">
+
+                        <p>Click on the webcam feed to pick a color, then adjust tolerance.</p>
+
+                        <div>
+                            <label for="tolerance">Tolerance:</label>
+                            <input id="tolerance" type="range" value="50" max="255" min="0" step="1">
+                        </div>
+
+                    </div>
+
+                    <div id="color"></div>
+
+                </div>
+            </div>
+
+            <div class="form-group">
+                <p>Current count: @colors.Count</p>
+
+
+            </div>
+            <div class="form-group">
+                <button type="button" class="btn btn-primary" @onclick="() => UpdateArticle()">Save</button>
+                <button type="button" class="btn btn-danger" @onclick="() => cancel()">Cancel</button>
+            </div>
+
+            <p>@colorResult.GetBrightness() GetBrightness </p>
+            <p>@colorResult.GetHue() GetHue </p>
+            <p>@colorResult.GetSaturation() GetSaturation </p>
+            <p>@colorResult.R R</p>
+            <p>@colorResult.B B</p>
+            <p>@colorResult.G G</p>
+        </form>
+    </div>
+</div>
+<div class="row">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Color by Red</th>
+                <th>Temp. (C)</th>
+                <th> Color</th>
+                <th> Name</th>
+                <th>Value</th>
+                <th>Hue</th>
+                <th>Saturation</th>
+                <th>Brightness</th>
+                <th>HashCode</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var grp in prodQuery)
+            {
+
+                if(HSVColor.GetHSV(grp.Key).Hue>330|| HSVColor.GetHSV(grp.Key).Hue<20&&HSVColor.GetHSV(grp.Key).Saturation>30)
+                {
+                    <tr>
+                        <td style="background-color: rgb(@grp.Key.R ,@grp.Key.B , @grp.Key.G )"></td>
+                        <td>@grp.Value</td>
+                        <td>R @grp.Key.R ,G @grp.Key.G ,B @grp.Key.B </td>
+                        <td>@grp.Key.Name</td>
+                        <td>@HSVColor.GetHSV(grp.Key).Value</td>
+                        <td>@HSVColor.GetHSV(grp.Key).Hue</td>
+                        <td>@HSVColor.GetHSV(grp.Key).Saturation</td>
+                        <td>@grp.Key.GetBrightness()</td>
+                        <td>@grp.Key.GetHashCode()</td>
+                    </tr>
+
+                }
+
+                if (grp.Value <= 500 && grp.Value >= 00)
+                {
+
+                }
+
+            }
+        </tbody>
+    </table>
+</div>
+
+
+@code  {
+
+    public struct HSVColor
+    {
+        public double Hue;
+        public double Saturation;
+        public double Value;
+
+        
+        public static HSVColor GetHSV (Color color)
+        {
+     
+        
+            int max = Math.Max(color.R, Math.Max(color.G, color.B));
+            int min = Math.Min(color.R, Math.Min(color.G, color.B));
+
+            toReturn.Hue = Math.Round(color.GetHue(), 2);
+            toReturn.Saturation = ( ( max == 0 ) ? 0 : 1d - ( 1d * min / max ) ) * 100;
+            toReturn.Saturation = Math.Round(toReturn.Saturation, 2);
+            toReturn.Value = Math.Round(( ( max / 255d ) * 100 ), 2);
+
+            return toReturn;
+        }
+    }
+
+    
+
+    [Parameter]
+    public string ID { get; set; }
+
+    Images imageEntity = new Images();
+    List<Color> colors = new List<Color>();
+    static HSVColor toReturn = new HSVColor();
+    Dictionary<Color, int>  prodQuery = new Dictionary<Color, int> ();
+
+    Color colorResult= new Color();
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await JsRuntime.InvokeVoidAsync("addDatePicker");
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        imageEntity = await ImagesService.GetById(Guid.Parse(ID));
+        CountImageColors(imageEntity.Url);
+    }
+
+    protected async Task UpdateArticle()
+    {
+        //await ImagesService.Update(imageEntity);
+        navigationManager.NavigateTo("/fetchdata");
+    }
+
+    void cancel()
+    {
+        navigationManager.NavigateTo("/fetchdata");
+    }
+
+    private int CountImageColors(string fileName)
+    {
+        System.Net.WebRequest request =
+            System.Net.WebRequest.Create(fileName);
+        System.Net.WebResponse response = request.GetResponse();
+        System.IO.Stream responseStream =
+            response.GetResponseStream();
+
+        Bitmap bmp = new Bitmap(responseStream);
+         colorResult =getDominantColor(bmp);
+
+
+        for (int x = 0; x < bmp.Width; x++)
+        {
+            for (int y = 0; y < bmp.Height; y++)
+            {
+                colors.Add(bmp.GetPixel(x, y));
+                //Color pxl = bmp.GetPixel(x, y);
+                //Color redPxl = Color.FromArgb(pxl.R, 0, 0);
+
+                //redBmp.SetPixel(x, y, redPxl);
+            }
+        }
+
+
+        var groups = colors.GroupBy(s => s).Select(
+            s => new { Color = s.Key, Count = s.Count() });
+
+        prodQuery = groups.ToDictionary(g => g.Color, g => g.Count);
+
+
+        //prodQuery =
+        //   from prod in colors
+        //   group prod by prod.R into grouping
+        //   select grouping;
+
+        var result = from color in colors
+                     group color by color.R
+            into colorGroup
+                     select new
+                     {
+                         R = colorGroup.Key,
+                         Count = colorGroup.Count()
+                     };
+
+        //var  results = colors
+        //      .GroupBy(n => n.R)
+        //      .Select(n => new
+        //      {
+        //          MetricName = n.Key,
+        //          MetricCount = n.Count()
+        //      }
+        //      )
+        //      .OrderBy(n => n.MetricName);
+
+        //results = colors.GroupBy(x => x)
+        //    .ToDictionary(g => g.Key, g => g.Count());
+        //results = colors.GroupBy(s => s).Select(g => new { Color = g.Key, Count = g.Count() });
+
+        //int x = 0;
+        //for ( x < bmp.Size.Width; x++)
+        //{
+        //    for (int y = 0; y > bmp.Size.Height; y++)
+        //    {
+
+        //        try
+        //        {
+
+        //        }
+        //        catch (Exception)
+        //        {
+        //        }
+        //    }
+        //}
+        return colors.Count;
+    }
+
+
+    public static Color getDominantColor(Bitmap bmp)
+    {
+    //Used for tally
+        int r = 0;
+        int g = 0;
+        int b = 0;
+
+        int total = 0;
+
+        for (int x = 0; x < bmp.Width; x++)
+        {
+            for (int y = 0; y < bmp.Height; y++)
+            {
+                Color clr = bmp.GetPixel(x, y);    
+                r += clr.R;
+                g += clr.G;
+                b += clr.B;    
+                total++;
+            }
+        }
+
+    //Calculate average
+        r /= total;
+        g /= total;
+        b /= total;
+
+        return Color.FromArgb(r, g, b);
+    }
+
+}

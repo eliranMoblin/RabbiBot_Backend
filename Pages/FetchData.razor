@@ -1,46 +1,119 @@
 ﻿@page "/fetchdata"
 
+@using Common.ExtensionMethods
+@using Entity
 @using RabbiBot_Backend.Data
-@inject WeatherForecastService ForecastService
+@inject ImagesService ImagesService
 
 <h1>Weather forecast</h1>
 
 <p>This component demonstrates fetching data from a service.</p>
 
-@if (forecasts == null)
+@if (images == null)
 {
     <p><em>Loading...</em></p>
 }
 else
 {
-    <table class="table">
+    <table class="table table-bordered table-hover">
         <thead>
             <tr>
+                <th class="sort-th" @onclick="@(() => SortTable("ID"))">
+                    ID
+                    <span class="fa @(SetSortIcon("ID"))"></span>
+                </th>
+                <th>Color</th>
+                <th>Url</th>
                 <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var forecast in forecasts)
+            @foreach (var image in images)
             {
-                <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
-                </tr>
+            <tr>
+                <td>@image.Id</td>
+                <td>@image.Colors</td>
+                <td>@image.Url</td>
+                <td>@image.CreatedDate.GetRelativeDateText()</td>
+                <td>
+                    <a class="btn btn-primary" href='/Edit/@image.Id'>Edit</a>  |
+                    @*<a class="btn btn-danger" @onclick="() => DeleteArticle(article.ID)">Delete</a>*@
+                </td>
+            </tr>
             }
         </tbody>
     </table>
 }
 
 @code {
-    private WeatherForecast[] forecasts;
+
+    #region Pagination
+
+    int totalPages;
+    int totalRecords;
+    int curPage;
+    int pagerSize;
+    int pageSize;
+    int startPage;
+    int endPage;
+    string sortColumnName = "ID";
+    string sortDir = "DESC";
+
+    private bool isSortedAscending;
+    private string activeSortColumn;
+
+    #endregion
+    private List<Images> images;
 
     protected override async Task OnInitializedAsync()
     {
-        forecasts = await ForecastService.GetForecastAsync(DateTime.Now);
+        images = await ImagesService.GetImages();
+    }
+
+    private async Task<List<Images>> SortRecords(string columnName, string dir)
+    {
+        return await ImagesService.GetImages();
+    }
+
+    private async Task SortTable(string columnName)
+    {
+        if (columnName != activeSortColumn)
+        {
+            images = await SortRecords(columnName, "ASC");
+            isSortedAscending = true;
+            activeSortColumn = columnName;
+        }
+        else
+        {
+            if (isSortedAscending)
+            {
+                images = await SortRecords(columnName, "DESC");
+            }
+            else
+            {
+                images = await SortRecords(columnName, "ASC");
+            }
+
+            isSortedAscending = !isSortedAscending;
+        }
+        sortColumnName = columnName;
+        sortDir = isSortedAscending ? "ASC" : "DESC";
+    }
+
+    private string SetSortIcon(string columnName)
+    {
+        if (activeSortColumn != columnName)
+        {
+            return string.Empty;
+        }
+        if (isSortedAscending)
+        {
+            return "fa-sort-up";
+        }
+        else
+        {
+            return "fa-sort-down";
+        }
     }
 }

@@ -1,5 +1,62 @@
 ﻿@page "/"
+@using Blazor.Extensions
+@inject IJSRuntime JsRuntime
 
-<h1>Hello, world!</h1>
+<div class="container-fluid">
+    <div class="display">
+        <img id="webcam" src="/css/5a2a5fa5-9fd4-4f4b-9435-5d571580baf6.jpg"  />
+        @*<img id="webcam" src="https://gomoblinportal.blob.core.windows.net/test/test/5a2a5fa5-9fd4-4f4b-9435-5d571580baf6" crossorigin="anonymous" class="img-fluid" />*@
+        <canvas id="canvas" width="640" height="480"></canvas>
+    </div>
 
-Welcome to your new app.
+    <div class="ui">
+
+        <div class="controls" style="display: none">
+
+            <p>Click on the webcam feed to pick a color, then adjust tolerance.</p>
+
+            <div>
+                <label for="tolerance">Tolerance:</label>
+                <input id="tolerance" type="range" value="50" max="255" min="0" step="1">
+            </div>
+
+        </div>
+
+        <div id="color"></div>
+
+    </div>
+
+</div>
+
+@code
+{
+    //private Canvas2DContext _context;
+
+    protected BECanvasComponent _canvasReference;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JsRuntime.InvokeVoidAsync("addDatePicker");    
+        }
+        
+        //this._context = await this._canvasReference.CreateCanvas2DAsync();
+        //await this._context.SetFillStyleAsync("green");
+
+        //await this._context.FillRectAsync(10, 100, 100, 100);
+
+        //await this._context.SetFontAsync("48px serif");
+        //await this._context.StrokeTextAsync("Hello Blazor!!!", 10, 100);
+    }
+
+    //private string _message = "Select a button to learn its position.";
+    //private async Task GetColor(MouseEventArgs e)
+    //{
+    //    await JsRuntime.InvokeVoidAsync("addDatePicker", e);
+
+    //    var pxlColor = await _context.GetLineDashAsync();
+    //    _message = $"You selected Button # at " +
+    //               $"mouse position: {e.ClientX} X {e.ClientY}.  event {e} color";
+    //}
+}

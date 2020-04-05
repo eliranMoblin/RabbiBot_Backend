@@ -1,0 +1,17 @@
+﻿<div class="colours">
+    @foreach (var colour in Colours)
+    {
+        <button class="colour"
+                @onclick="@OnClick(colour)"
+                @key="@colour">
+        </button>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public Func<string, Action<MouseEventArgs>> OnClick { get; set; }
+
+    [Parameter]
+    public IEnumerable<string> Colours { get; set; }
+}

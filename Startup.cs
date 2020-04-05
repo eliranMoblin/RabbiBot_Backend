@@ -25,6 +25,8 @@ namespace RabbiBot_Backend
             Configuration = configuration;
         }
 
+        readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -39,7 +41,30 @@ namespace RabbiBot_Backend
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
-            services.AddSingleton<WeatherForecastService>();
+            services.AddSingleton<ImagesService>();
+            
+            //services.AddCors(options =>
+            //{
+            //    options.AddDefaultPolicy(builder =>
+            //    {
+            //        builder.WithOrigins("https://localhost:44394/")
+            //            .AllowAnyMethod()
+            //            .AllowAnyHeader();
+            //    });
+            //});
+
+            //services.AddCors(options =>
+            //{
+            //    options.AddPolicy(MyAllowSpecificOrigins,
+            //        builder =>
+            //        {
+            //            builder.WithOrigins("https://gomoblinportal.blob.core.windows.net",
+            //                "https://localhost:44394/")
+            //                .AllowAnyMethod()
+            //                .AllowAnyHeader();
+            //        })
+            //        ;
+            //});
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -56,8 +81,14 @@ namespace RabbiBot_Backend
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+            app.UseCors(
+                options => options.SetIsOriginAllowed(x => _ = true).AllowAnyMethod().AllowAnyHeader().AllowCredentials()
+            );
 
-            app.UseHttpsRedirection();
+            app.UseCors(builder => builder.WithOrigins("https://localhost:44394")
+                .AllowAnyMethod()
+                .AllowAnyHeader());
+            app.UseHttpsRedirection();                                           
             app.UseStaticFiles();
 
             app.UseRouting();
