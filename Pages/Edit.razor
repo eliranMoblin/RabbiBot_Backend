@@ -1,10 +1,9 @@
 ﻿@page "/Edit/{Id}"
-@using System.Collections
+@implements IDisposable
 @using System.Drawing
+@using Common
 @using Entity
 @using RabbiBot_Backend.Data
-@using Blazor.Extensions
-@using ValidationSummary = Microsoft.AspNetCore.Components.Forms.ValidationSummary
 @inject IJSRuntime JsRuntime
 
 
@@ -14,20 +13,16 @@
 <div class="row">
     <div class="col-md-4">
         <form>
-            <div class="form-group">
+            @*<div class="form-group">
                 <label for="Name" class="control-label">Name</label>
                 <input for="Name" class="form-control" @bind-value="@imageEntity.Id" />
                 <input type="hidden" @bind-value="@imageEntity.Url" />
-            </div>
-            <div class="form-group">
-                <label for="Color" class="control-label">Color</label>
-                <input for="Color" class="form-control" @bind-value="@imageEntity.Colors" />
-            </div>
+            </div>*@
 
             <div class="form-group">
                 <label for="Color" class="control-label">Image</label>
-                <input for="Color" class="form-control" @bind-value="@imageEntity.Url" />
-                <img id="webcam" src="@imageEntity.Url" crossorigin="anonymous" class="img-fluid" />
+                @*<input for="Color" class="form-control" @bind-value="@imageEntity.Url" />*@
+                <img id="webcam" src="@imageEntity.Url" crossorigin="anonymous" class="img-thumbnail" />
                 <canvas id="canvas" width="640" height="480"></canvas>
                 <div class="ui">
 
@@ -53,106 +48,87 @@
 
             </div>
             <div class="form-group">
-                <button type="button" class="btn btn-primary" @onclick="() => UpdateArticle()">Save</button>
+                @*<button type="button" class="btn btn-primary" @onclick="() => UpdateArticle()">Save</button>*@
                 <button type="button" class="btn btn-danger" @onclick="() => cancel()">Cancel</button>
             </div>
 
-            <p>@colorResult.GetBrightness() GetBrightness </p>
+            @*<p>@colorResult.GetBrightness() GetBrightness </p>
             <p>@colorResult.GetHue() GetHue </p>
             <p>@colorResult.GetSaturation() GetSaturation </p>
             <p>@colorResult.R R</p>
             <p>@colorResult.B B</p>
-            <p>@colorResult.G G</p>
+            <p>@colorResult.G G</p>*@
         </form>
     </div>
 </div>
 <div class="row">
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Color by Red</th>
-                <th>Temp. (C)</th>
-                <th> Color</th>
-                <th> Name</th>
-                <th>Value</th>
-                <th>Hue</th>
-                <th>Saturation</th>
-                <th>Brightness</th>
-                <th>HashCode</th>
-            </tr>
-        </thead>
-        <tbody>
+    <div class="col">
+        <table class="table table-bordered table-hover" id="My_table">
+            <thead>
+                <tr>
+                    <th>Color</th>
+                    <th>Hue</th>
+                    <th>Saturation</th>
+                    <th>Value</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
             @foreach (var grp in prodQuery)
             {
 
-                if(HSVColor.GetHSV(grp.Key).Hue>330|| HSVColor.GetHSV(grp.Key).Hue<20&&HSVColor.GetHSV(grp.Key).Saturation>30)
+                if (HSVColor.GetHSV(grp.Key).Hue < 330 || HSVColor.GetHSV(grp.Key).Hue > 20 && HSVColor.GetHSV(grp.Key).Saturation > 30)
                 {
-                    <tr>
-                        <td style="background-color: rgb(@grp.Key.R ,@grp.Key.B , @grp.Key.G )"></td>
-                        <td>@grp.Value</td>
-                        <td>R @grp.Key.R ,G @grp.Key.G ,B @grp.Key.B </td>
-                        <td>@grp.Key.Name</td>
-                        <td>@HSVColor.GetHSV(grp.Key).Value</td>
-                        <td>@HSVColor.GetHSV(grp.Key).Hue</td>
-                        <td>@HSVColor.GetHSV(grp.Key).Saturation</td>
-                        <td>@grp.Key.GetBrightness()</td>
-                        <td>@grp.Key.GetHashCode()</td>
-                    </tr>
+                <tr>
+                    <td style="background-color: rgb(@grp.Key.R, @grp.Key.B, @grp.Key.G)"></td>
+                    <td>@Convert.ToInt32(HSVColor.GetHSV(grp.Key).Hue)</td>
+                    <td>@Convert.ToInt32(@HSVColor.GetHSV(grp.Key).Saturation)</td>
+                    <td>@Convert.ToInt32(@HSVColor.GetHSV(grp.Key).Value)</td>
+                 
+                    <td>
+                        <button type="button" class="btn btn-primary" @onclick="@(async ()=> UpdateArticle(grp.Key, (int) Status.Clean))">Primary</button>
+                        <button type="button" class="btn btn-light"  @onclick="@(async ()=> UpdateArticle(grp.Key, (int) Status.NotKnow))">Light</button>
+                        <button type="button" class="btn btn-danger" @onclick="@(async ()=> UpdateArticle(grp.Key, (int) Status.Dirty))">Danger</button>
+                    </td>
+                </tr>
 
                 }
 
-                if (grp.Value <= 500 && grp.Value >= 00)
-                {
-
-                }
 
             }
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
+    
 </div>
 
 
 @code  {
 
-    public struct HSVColor
-    {
-        public double Hue;
-        public double Saturation;
-        public double Value;
 
-        
-        public static HSVColor GetHSV (Color color)
-        {
-     
-        
-            int max = Math.Max(color.R, Math.Max(color.G, color.B));
-            int min = Math.Min(color.R, Math.Min(color.G, color.B));
 
-            toReturn.Hue = Math.Round(color.GetHue(), 2);
-            toReturn.Saturation = ( ( max == 0 ) ? 0 : 1d - ( 1d * min / max ) ) * 100;
-            toReturn.Saturation = Math.Round(toReturn.Saturation, 2);
-            toReturn.Value = Math.Round(( ( max / 255d ) * 100 ), 2);
 
-            return toReturn;
-        }
-    }
-
-    
 
     [Parameter]
     public string ID { get; set; }
 
     Images imageEntity = new Images();
     List<Color> colors = new List<Color>();
-    static HSVColor toReturn = new HSVColor();
-    Dictionary<Color, int>  prodQuery = new Dictionary<Color, int> ();
+    Dictionary<Color, int> prodQuery = new Dictionary<Color, int>();
 
-    Color colorResult= new Color();
+    Color colorResult = new Color();
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await JsRuntime.InvokeVoidAsync("addDatePicker");
-
+        await JsRuntime.InvokeAsync<object>("TestDataTablesAdd", "#My_table");
     }
+
+    void IDisposable.Dispose()
+    {
+        JsRuntime.InvokeAsync<object>("TestDataTablesRemove", "#My_table");
+    }
+
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -160,9 +136,9 @@
         CountImageColors(imageEntity.Url);
     }
 
-    protected async Task UpdateArticle()
+    protected async Task UpdateArticle(Color color,int status)
     {
-        //await ImagesService.Update(imageEntity);
+        await ImagesService.Update(color, status);
         navigationManager.NavigateTo("/fetchdata");
     }
 
@@ -180,7 +156,7 @@
             response.GetResponseStream();
 
         Bitmap bmp = new Bitmap(responseStream);
-         colorResult =getDominantColor(bmp);
+        colorResult = getDominantColor(bmp);
 
 
         for (int x = 0; x < bmp.Width; x++)
@@ -251,7 +227,7 @@
 
     public static Color getDominantColor(Bitmap bmp)
     {
-    //Used for tally
+        //Used for tally
         int r = 0;
         int g = 0;
         int b = 0;
@@ -262,15 +238,15 @@
         {
             for (int y = 0; y < bmp.Height; y++)
             {
-                Color clr = bmp.GetPixel(x, y);    
+                Color clr = bmp.GetPixel(x, y);
                 r += clr.R;
                 g += clr.G;
-                b += clr.B;    
+                b += clr.B;
                 total++;
             }
         }
 
-    //Calculate average
+        //Calculate average
         r /= total;
         g /= total;
         b /= total;

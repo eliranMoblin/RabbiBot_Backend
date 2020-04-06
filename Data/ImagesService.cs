@@ -1,11 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
-using Entity;
+using Common;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Server.Models;
+using Images = Entity.Images;
 
 namespace RabbiBot_Backend.Data
 {
@@ -43,6 +48,29 @@ namespace RabbiBot_Backend.Data
             var data = await client.DownloadStringTaskAsync($"https://localhost:44387/images/GetById/{id}");
             var obj = JsonConvert.DeserializeObject<Images>(data);
             return obj;
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Update(Color color,int status)
+        {
+            Colors colors = new Colors
+            {
+                Hue = Convert.ToInt32(HSVColor.GetHSV(color).Hue),
+                Saturation = Convert.ToInt32(HSVColor.GetHSV(color).Saturation),
+                Value = Convert.ToInt32(HSVColor.GetHSV(color).Value),
+                Status = status,
+                CreateDate = DateTime.UtcNow
+
+            };
+            using (HttpClient client = new HttpClient())
+            {
+                var content = new StringContent(colors.ToString(), Encoding.UTF8, "application/json");
+
+                var result =await client.PostAsync("https://localhost:44387/images/Update", content);
+            }
+
+            
+            return null;
         }
     }
 }

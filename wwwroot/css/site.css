@@ -164,6 +164,7 @@ app {
 
     .main .top-row {
         position: sticky;
+        z-index: 9;
         top: 0;
     }
 
@@ -319,3 +320,32 @@ canvas {
     width: 100%;
 }
 
+
+
+
+
+.jsgrid-grid-header {
+    text-align: center;
+    border-collapse: collapse;
+    background: #ebebeb;
+}
+
+.jsgrid-row-item:hover {
+    background: #9fcdf4;
+}
+
+th, td {
+    padding: 15px;
+    border: 1px solid #d1d1d1;
+    text-align: center;
+}
+
+.pagebutton {
+    margin-right: 5px;
+    margin-top: 5px;
+}
+
+.currentpage {
+    background-color: dodgerblue;
+    color: white;
+}

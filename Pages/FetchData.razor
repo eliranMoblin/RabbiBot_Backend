@@ -1,5 +1,6 @@
 ﻿@page "/fetchdata"
-
+@inject IJSRuntime JsRuntime
+@implements IDisposable
 @using Common.ExtensionMethods
 @using Entity
 @using RabbiBot_Backend.Data
@@ -15,14 +16,10 @@
 }
 else
 {
-    <table class="table table-bordered table-hover">
+    <table class="table table-bordered table-hover" id="My_table">
         <thead>
             <tr>
-                <th class="sort-th" @onclick="@(() => SortTable("ID"))">
-                    ID
-                    <span class="fa @(SetSortIcon("ID"))"></span>
-                </th>
-                <th>Color</th>
+                <th>ID</th>
                 <th>Url</th>
                 <th>Date</th>
                 <th>Action</th>
@@ -31,16 +28,16 @@ else
         <tbody>
             @foreach (var image in images)
             {
-            <tr>
-                <td>@image.Id</td>
-                <td>@image.Colors</td>
-                <td>@image.Url</td>
-                <td>@image.CreatedDate.GetRelativeDateText()</td>
-                <td>
-                    <a class="btn btn-primary" href='/Edit/@image.Id'>Edit</a>  |
-                    @*<a class="btn btn-danger" @onclick="() => DeleteArticle(article.ID)">Delete</a>*@
-                </td>
-            </tr>
+                <tr>
+                    <td>@image.Id</td>
+
+                    <td>@image.Url</td>
+                    <td>@image.CreatedDate.GetRelativeDateText()</td>
+                    <td>
+                        <a class="btn btn-primary" href='/Edit/@image.Id'>Edit</a>  |
+                        @*<a class="btn btn-danger" @onclick="() => DeleteArticle(article.ID)">Delete</a>*@
+                    </td>
+                </tr>
             }
         </tbody>
     </table>
@@ -69,6 +66,20 @@ else
     protected override async Task OnInitializedAsync()
     {
         images = await ImagesService.GetImages();
+
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+
+        await JsRuntime.InvokeAsync<object>("TestDataTablesAdd", "#My_table");
+        //await JsRuntime.InvokeVoidAsync("TestDataTablesAdd");
+    }
+
+
+    void IDisposable.Dispose()
+    {
+        JsRuntime.InvokeAsync<object>("TestDataTablesRemove", "#My_table");
     }
 
     private async Task<List<Images>> SortRecords(string columnName, string dir)
