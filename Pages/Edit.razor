@@ -1,63 +1,43 @@
 ﻿@page "/Edit/{Id}"
 @implements IDisposable
 @using System.Drawing
+@using System.IO
 @using Common
+@using System.Net
 @using Entity
 @using RabbiBot_Backend.Data
+@using Server.Models
+@using Images = Entity.Images
 @inject IJSRuntime JsRuntime
-
-
 @inject ImagesService ImagesService
+@inject ColorsService ColorsService
 @inject Microsoft.AspNetCore.Components.NavigationManager navigationManager
 
 <div class="row">
     <div class="col-md-4">
         <form>
-            @*<div class="form-group">
-                <label for="Name" class="control-label">Name</label>
-                <input for="Name" class="form-control" @bind-value="@imageEntity.Id" />
-                <input type="hidden" @bind-value="@imageEntity.Url" />
-            </div>*@
-
             <div class="form-group">
                 <label for="Color" class="control-label">Image</label>
-                @*<input for="Color" class="form-control" @bind-value="@imageEntity.Url" />*@
                 <img id="webcam" src="@imageEntity.Url" crossorigin="anonymous" class="img-thumbnail" />
                 <canvas id="canvas" width="640" height="480"></canvas>
                 <div class="ui">
-
                     <div class="controls" style="display: none">
-
                         <p>Click on the webcam feed to pick a color, then adjust tolerance.</p>
-
                         <div>
                             <label for="tolerance">Tolerance:</label>
                             <input id="tolerance" type="range" value="50" max="255" min="0" step="1">
                         </div>
-
                     </div>
-
                     <div id="color"></div>
-
                 </div>
             </div>
 
             <div class="form-group">
                 <p>Current count: @colors.Count</p>
-
-
             </div>
             <div class="form-group">
-                @*<button type="button" class="btn btn-primary" @onclick="() => UpdateArticle()">Save</button>*@
                 <button type="button" class="btn btn-danger" @onclick="() => cancel()">Cancel</button>
             </div>
-
-            @*<p>@colorResult.GetBrightness() GetBrightness </p>
-            <p>@colorResult.GetHue() GetHue </p>
-            <p>@colorResult.GetSaturation() GetSaturation </p>
-            <p>@colorResult.R R</p>
-            <p>@colorResult.B B</p>
-            <p>@colorResult.G G</p>*@
         </form>
     </div>
 </div>
@@ -74,32 +54,49 @@
                 </tr>
             </thead>
             <tbody>
-            @foreach (var grp in prodQuery)
+            @foreach (var item in colorsViewModelList)
             {
-
-                if (HSVColor.GetHSV(grp.Key).Hue < 330 || HSVColor.GetHSV(grp.Key).Hue > 20 && HSVColor.GetHSV(grp.Key).Saturation > 30)
+                if (item.Hue<330||item.Hue>20&&item.Saturation>30)
                 {
-                <tr>
-                    <td style="background-color: rgb(@grp.Key.R, @grp.Key.B, @grp.Key.G)"></td>
-                    <td>@Convert.ToInt32(HSVColor.GetHSV(grp.Key).Hue)</td>
-                    <td>@Convert.ToInt32(@HSVColor.GetHSV(grp.Key).Saturation)</td>
-                    <td>@Convert.ToInt32(@HSVColor.GetHSV(grp.Key).Value)</td>
-                 
+                    var id = $"{item.Hue}-{item.Saturation}-{item.Value}";
+                <tr id="@id">
+                    <td style="background-color: rgb(@item.RBG)"></td>
+                    <td>@item.Hue</td>
+                    <td>@item.Saturation</td>
+                    <td>@item.Value</td>
                     <td>
-                        <button type="button" class="btn btn-primary" @onclick="@(async ()=> UpdateArticle(grp.Key, (int) Status.Clean))">Primary</button>
-                        <button type="button" class="btn btn-light"  @onclick="@(async ()=> UpdateArticle(grp.Key, (int) Status.NotKnow))">Light</button>
-                        <button type="button" class="btn btn-danger" @onclick="@(async ()=> UpdateArticle(grp.Key, (int) Status.Dirty))">Danger</button>
+                        <button type="button" class="btn btn-primary" @onclick="@(async ()=> UpdateArticle(item, (int) Status.Clean,id))">Primary</button>
+                        <button type="button" class="btn btn-light" @onclick="@(async ()=> UpdateArticle(item, (int) Status.NotKnow,id))">Light</button>
+                        <button type="button" class="btn btn-danger" @onclick="@(async ()=> UpdateArticle(item, (int) Status.Dirty,id))">Danger</button>
                     </td>
                 </tr>
-
                 }
 
-
             }
+            @*@foreach (var item in prodQuery.Where(x => x.Value == 1))
+                {
+
+                    if (HSVColor.GetHSV(item.Key).Hue < 330 || HSVColor.GetHSV(item.Key).Hue > 20 && HSVColor.GetHSV(item.Key).Saturation > 30)
+                    {
+                        ConvertColor(item.Key);
+                        var id = $"{hue.ToString()}-{saturation.ToString()}-{value.ToString()}";
+                        <tr id="@id">
+                            <td style="background-color: rgb(@item.Key.R, @item.Key.B, @item.Key.G)"></td>
+                            <td>@Convert.ToInt32(HSVColor.GetHSV(item.Key).Hue)</td>
+                            <td>@Convert.ToInt32(@HSVColor.GetHSV(item.Key).Saturation)</td>
+                            <td>@Convert.ToInt32(@HSVColor.GetHSV(item.Key).Value)</td>
+
+                            <td>
+                                <button type="button" class="btn btn-primary" @onclick="@(async ()=> UpdateArticle(item.Key, (int) Status.Clean,id))">Primary</button>
+                                <button type="button" class="btn btn-light" @onclick="@(async ()=> UpdateArticle(item.Key, (int) Status.NotKnow,id))">Light</button>
+                                <button type="button" class="btn btn-danger" @onclick="@(async ()=> UpdateArticle(item.Key, (int) Status.Dirty,id))">Danger</button>
+                            </td>
+                        </tr>
+                    }
+                }*@
             </tbody>
         </table>
     </div>
-    
 </div>
 
 
@@ -108,6 +105,17 @@
 
 
 
+    int hue;
+    int saturation;
+    int value;
+
+    protected async Task ConvertColor(Color color)
+    {
+        hue = Convert.ToInt32(HSVColor.GetHSV(color).Hue);
+        saturation = Convert.ToInt32(HSVColor.GetHSV(color).Saturation);
+        value = Convert.ToInt32(HSVColor.GetHSV(color).Value);
+    }
+
 
     [Parameter]
     public string ID { get; set; }
@@ -115,12 +123,21 @@
     Images imageEntity = new Images();
     List<Color> colors = new List<Color>();
     Dictionary<Color, int> prodQuery = new Dictionary<Color, int>();
+    List<Colors> colorsList{ get; set; }
 
-    Color colorResult = new Color();
+
+    List<ColorViewModel> colorsViewModelList = new List<ColorViewModel>();
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await JsRuntime.InvokeVoidAsync("addDatePicker");
-        await JsRuntime.InvokeAsync<object>("TestDataTablesAdd", "#My_table");
+        if (firstRender)
+        {
+    //colorsList = await ColorsService.Get();
+            await JsRuntime.InvokeVoidAsync("addDatePicker");
+            await JsRuntime.InvokeAsync<object>("TestDataTablesAdd", "#My_table");
+            imageEntity = await ImagesService.GetById(Guid.Parse(ID));
+            
+        }
+    //
     }
 
     void IDisposable.Dispose()
@@ -128,18 +145,17 @@
         JsRuntime.InvokeAsync<object>("TestDataTablesRemove", "#My_table");
     }
 
-
-
     protected override async Task OnInitializedAsync()
     {
-        imageEntity = await ImagesService.GetById(Guid.Parse(ID));
-        CountImageColors(imageEntity.Url);
+
+        colorsViewModelList=await ColorsService.GetImageColor(Guid.Parse(ID));
+        
     }
 
-    protected async Task UpdateArticle(Color color,int status)
+    protected async Task UpdateArticle(ColorViewModel color, int status, string id)
     {
-        await ImagesService.Update(color, status);
-        navigationManager.NavigateTo("/fetchdata");
+        await ColorsService.Update(color, status);
+        await JsRuntime.InvokeAsync<object>("HiedRow", id);
     }
 
     void cancel()
@@ -147,111 +163,107 @@
         navigationManager.NavigateTo("/fetchdata");
     }
 
-    private int CountImageColors(string fileName)
-    {
-        System.Net.WebRequest request =
-            System.Net.WebRequest.Create(fileName);
-        System.Net.WebResponse response = request.GetResponse();
-        System.IO.Stream responseStream =
-            response.GetResponseStream();
+    //private async Task<int> CountImageColors(string fileName)
+    //{
 
-        Bitmap bmp = new Bitmap(responseStream);
-        colorResult = getDominantColor(bmp);
+    //    var request = WebRequest.Create(fileName);
+    //    var response = request.GetResponse();
+    //    var responseStream = response.GetResponseStream();
+    //    Bitmap bmp = new Bitmap(responseStream);
 
 
-        for (int x = 0; x < bmp.Width; x++)
-        {
-            for (int y = 0; y < bmp.Height; y++)
-            {
-                colors.Add(bmp.GetPixel(x, y));
-                //Color pxl = bmp.GetPixel(x, y);
-                //Color redPxl = Color.FromArgb(pxl.R, 0, 0);
+    //    for (int x = 0; x < bmp.Width; x++)
+    //    {
+    //        for (int y = 0; y < bmp.Height; y++)
+    //        {
+    /////colors.Add(bmp.GetPixel(x, y));
+    //            var color = bmp.GetPixel(x, y);
+    //            ColorViewModel model = new ColorViewModel
+    //            {
+    //                Hue = Convert.ToInt32(HSVColor.GetHSV(color).Hue),
+    //                Saturation = Convert.ToInt32(HSVColor.GetHSV(color).Saturation),
+    //                Value = Convert.ToInt32(HSVColor.GetHSV(color).Value),
+    //                RBG = $"{color.R},{color.B},{color.G}"
 
-                //redBmp.SetPixel(x, y, redPxl);
-            }
-        }
+    //            };
 
+    ////var alreadyExist=  colorsViewModelList.Contains(model);'
+    //            var reuslt = colorsViewModelList.SingleOrDefault(x => x.Hue == model.Hue && x.Saturation == model.Saturation && x.Value == model.Value);
+    //            if (reuslt==null)
+    //            {
 
-        var groups = colors.GroupBy(s => s).Select(
-            s => new { Color = s.Key, Count = s.Count() });
-
-        prodQuery = groups.ToDictionary(g => g.Color, g => g.Count);
-
-
-        //prodQuery =
-        //   from prod in colors
-        //   group prod by prod.R into grouping
-        //   select grouping;
-
-        var result = from color in colors
-                     group color by color.R
-            into colorGroup
-                     select new
-                     {
-                         R = colorGroup.Key,
-                         Count = colorGroup.Count()
-                     };
-
-        //var  results = colors
-        //      .GroupBy(n => n.R)
-        //      .Select(n => new
-        //      {
-        //          MetricName = n.Key,
-        //          MetricCount = n.Count()
-        //      }
-        //      )
-        //      .OrderBy(n => n.MetricName);
-
-        //results = colors.GroupBy(x => x)
-        //    .ToDictionary(g => g.Key, g => g.Count());
-        //results = colors.GroupBy(s => s).Select(g => new { Color = g.Key, Count = g.Count() });
-
-        //int x = 0;
-        //for ( x < bmp.Size.Width; x++)
-        //{
-        //    for (int y = 0; y > bmp.Size.Height; y++)
-        //    {
-
-        //        try
-        //        {
-
-        //        }
-        //        catch (Exception)
-        //        {
-        //        }
-        //    }
-        //}
-        return colors.Count;
-    }
+    //                var ccc = colorsList;
+    //                var xx = colorsList.SingleOrDefault(x => x.Hue == model.Hue && x.Saturation == model.Saturation && x.Value == model.Value);
+    //                if (xx==null)
+    //                {
+    //                    colorsViewModelList.Add(model);    
+    //                }
 
 
-    public static Color getDominantColor(Bitmap bmp)
-    {
-        //Used for tally
-        int r = 0;
-        int g = 0;
-        int b = 0;
+    //            }
 
-        int total = 0;
+    //        }
+    ////break;
+    //    }
 
-        for (int x = 0; x < bmp.Width; x++)
-        {
-            for (int y = 0; y < bmp.Height; y++)
-            {
-                Color clr = bmp.GetPixel(x, y);
-                r += clr.R;
-                g += clr.G;
-                b += clr.B;
-                total++;
-            }
-        }
+    //    return colors.Count;
+    ////var groups = colorsViewModelList.GroupBy(s => s).Select(
+    ////    s => new { Color = s.Key, Count = s.Count() }).ToList();
 
-        //Calculate average
-        r /= total;
-        g /= total;
-        b /= total;
 
-        return Color.FromArgb(r, g, b);
-    }
+    ////var xxx = groups.Where(x => x.Count == 1).ToList();
+
+    ////prodQuery = xxx.ToDictionary(g => g.Color, g => g.Count);
+
+
+    ////prodQuery =
+    ////   from prod in colors
+    ////   group prod by prod.R into grouping
+    ////   select grouping;
+
+    ////var result = from color in colors
+    ////             group color by color.R
+    ////    into colorGroup
+    ////             select new
+    ////             {
+    ////                 R = colorGroup.Key,
+    ////                 Count = colorGroup.Count()
+    ////             };
+
+    ////var  results = colors
+    ////      .GroupBy(n => n.R)
+    ////      .Select(n => new
+    ////      {
+    ////          MetricName = n.Key,
+    ////          MetricCount = n.Count()
+    ////      }
+    ////      )
+    ////      .OrderBy(n => n.MetricName);
+
+    ////results = colors.GroupBy(x => x)
+    ////    .ToDictionary(g => g.Key, g => g.Count());
+    ////results = colors.GroupBy(s => s).Select(g => new { Color = g.Key, Count = g.Count() });
+
+    ////int x = 0;
+    ////for ( x < bmp.Size.Width; x++)
+    ////{
+    ////    for (int y = 0; y > bmp.Size.Height; y++)
+    ////    {
+
+    ////        try
+    ////        {
+
+    ////        }
+    ////        catch (Exception)
+    ////        {
+    ////        }
+    ////    }
+    ////}
+
+    //}
+
+
+
+
 
 }

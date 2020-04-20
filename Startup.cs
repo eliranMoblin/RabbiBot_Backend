@@ -42,7 +42,7 @@ namespace RabbiBot_Backend
             services.AddServerSideBlazor();
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
             services.AddSingleton<ImagesService>();
-            
+            services.AddSingleton<ColorsService>();
             //services.AddCors(options =>
             //{
             //    options.AddDefaultPolicy(builder =>

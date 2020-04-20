@@ -1,6 +1,10 @@
 ﻿function TestDataTablesAdd(table) {
     $(document).ready(function () {
-        $(table).DataTable();
+        var tables=$(table).DataTable();
+
+        $('table tbody').on('click', 'tr', function () {
+           
+        });
     });
 }
 
@@ -8,6 +12,22 @@
 function TestDataTablesRemove(table) {
     $('table').DataTable().destroy();
     
+}
+
+function HiedRow(id) {
+    console.log(id);
+
+    $('#' + id + '').hide();
+
+    var tables = $('table').DataTable();
+    var child = tables.row(this).child;
+
+    if (child.isShown()) {
+        child.hide();
+    }
+    else {
+        child.show();
+    }
 }
 
 
