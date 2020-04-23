@@ -1,0 +1,115 @@
+﻿@page "/colors"
+@using Entity
+@using RabbiBot_Backend.Data
+@using Server.Models
+@using Enum = System.Enum
+@inject IJSRuntime JsRuntime
+@inject ColorsService ColorsService
+@inject BrowserService Service
+@implements IDisposable
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col mb-4">
+
+            <div class="card">
+                <div class="card-body">
+                    <form class="form-inline">
+                        <div class="form-group">
+                            <select class="form-control" bind="@selectedString" @onchange="DoStuff">
+                                <option value="0">-- Select Status --</option>
+                                @foreach (var template in Enum.GetValues(typeof(Status)))
+                                {
+                                    <option value=@template>@template</option>
+                                }
+                            </select>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col">
+
+
+            <div class="card">
+                <div class="card-body">
+                    <table class="table table-bordered table-hover table-responsive" id="My_table1">
+                        <thead>
+                            <tr>
+                                <th>Color</th>
+                                <th>Hue</th>
+                                <th>Saturation</th>
+                                <th>Value</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in colors)
+                            {
+                                <tr id="@item.Id">
+                                    <td style="background-color: rgb(@item.R, @item.G, @item.B)"></td>
+                                    <td>@item.Hue</td>
+                                    <td>@item.Saturation</td>
+                                    <td>@item.Value</td>
+                                    <td>@item.Status</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<button @onclick="GetDimensions">Get Dimensions</button>
+@code {
+
+
+    public int Height { get; set; }
+    public int Width { get; set; }
+
+    async Task GetDimensions()
+    {
+        var dimension = await Service.GetDimensions();
+        Height = dimension.Height;
+        Width = dimension.Width;
+    }
+
+    List<Server.Models.Colors> colors = new List<Server.Models.Colors>();
+    string selectedString = "Maui";
+    protected override async Task OnInitializedAsync()
+    {
+        colors = await ColorsService.GetColorByStatus(3);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+
+        }
+        if (colors.Count > 0)
+        {
+            Task.Delay(2000);
+            await JsRuntime.InvokeAsync<object>("TestDataTablesAdd", "#My_table1");
+        }
+
+        //await JsRuntime.InvokeVoidAsync("TestDataTablesAdd");
+    }
+
+
+    void IDisposable.Dispose()
+    {
+        JsRuntime.InvokeAsync<object>("TestDataTablesRemove", "#My_table1");
+    }
+
+    private async Task DoStuff(ChangeEventArgs e)
+    {
+        colors = await ColorsService.GetColorByStatus((int)Enum.Parse(typeof(Status), e.Value.ToString()));
+    }
+}

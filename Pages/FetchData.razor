@@ -6,9 +6,6 @@
 @using RabbiBot_Backend.Data
 @inject ImagesService ImagesService
 
-<h1>Weather forecast</h1>
-
-<p>This component demonstrates fetching data from a service.</p>
 
 @if (images == null)
 {
@@ -16,64 +13,55 @@
 }
 else
 {
-    <table class="table table-bordered table-hover" id="My_table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Url</th>
-                <th>Date</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var image in images)
-            {
-                <tr>
-                    <td>@image.Id</td>
+    <div class="row">
+        <div class="col">
 
-                    <td>@image.Url</td>
-                    <td>@image.CreatedDate.GetRelativeDateText()</td>
-                    <td>
-                        <a class="btn btn-primary" href='/Edit/@image.Id'>Edit</a>  |
-                        @*<a class="btn btn-danger" @onclick="() => DeleteArticle(article.ID)">Delete</a>*@
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+
+            <div class="card">
+                <div class="card-body">
+                    <table class="table table-bordered table-hover" id="My_table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Url</th>
+                                <th>Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var image in images)
+                            {
+                                <tr>
+                                    <td>@image.Id</td>
+
+                                    <td>@image.Url</td>
+                                    <td>@image.CreatedDate.GetRelativeDateText()</td>
+                                    <td>
+                                        <a class="btn btn-primary" href='/Edit/@image.Id'>Edit</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
 }
 
 @code {
 
-    #region Pagination
-
-    int totalPages;
-    int totalRecords;
-    int curPage;
-    int pagerSize;
-    int pageSize;
-    int startPage;
-    int endPage;
-    string sortColumnName = "ID";
-    string sortDir = "DESC";
-
-    private bool isSortedAscending;
-    private string activeSortColumn;
-
-    #endregion
     private List<Images> images;
 
     protected override async Task OnInitializedAsync()
     {
         images = await ImagesService.GetImages();
-
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-
         await JsRuntime.InvokeAsync<object>("TestDataTablesAdd", "#My_table");
-        //await JsRuntime.InvokeVoidAsync("TestDataTablesAdd");
     }
 
 
@@ -82,49 +70,4 @@ else
         JsRuntime.InvokeAsync<object>("TestDataTablesRemove", "#My_table");
     }
 
-    private async Task<List<Images>> SortRecords(string columnName, string dir)
-    {
-        return await ImagesService.GetImages();
-    }
-
-    private async Task SortTable(string columnName)
-    {
-        if (columnName != activeSortColumn)
-        {
-            images = await SortRecords(columnName, "ASC");
-            isSortedAscending = true;
-            activeSortColumn = columnName;
-        }
-        else
-        {
-            if (isSortedAscending)
-            {
-                images = await SortRecords(columnName, "DESC");
-            }
-            else
-            {
-                images = await SortRecords(columnName, "ASC");
-            }
-
-            isSortedAscending = !isSortedAscending;
-        }
-        sortColumnName = columnName;
-        sortDir = isSortedAscending ? "ASC" : "DESC";
-    }
-
-    private string SetSortIcon(string columnName)
-    {
-        if (activeSortColumn != columnName)
-        {
-            return string.Empty;
-        }
-        if (isSortedAscending)
-        {
-            return "fa-sort-up";
-        }
-        else
-        {
-            return "fa-sort-down";
-        }
-    }
 }

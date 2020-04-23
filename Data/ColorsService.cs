@@ -35,6 +35,9 @@ namespace RabbiBot_Backend.Data
                 Saturation = color.Saturation,
                 Value = color.Value,
                 Status = status,
+                R = color.R,
+                B = color.B,
+                G=color.G,
                 CreateDate = DateTime.UtcNow
             };
             using (HttpClient client = new HttpClient())
@@ -46,7 +49,7 @@ namespace RabbiBot_Backend.Data
         }
 
         
-        public async Task<List<ColorViewModel>> GetImageColor(Guid id)
+        public async Task<ImageResult> GetImageColor(Guid id)
         {
 
             WebClient client = new WebClient();
@@ -69,8 +72,10 @@ namespace RabbiBot_Backend.Data
                         Hue = Convert.ToInt32(HSVColor.GetHSV(color).Hue),
                         Saturation = Convert.ToInt32(HSVColor.GetHSV(color).Saturation),
                         Value = Convert.ToInt32(HSVColor.GetHSV(color).Value),
-                        RBG = $"{color.R},{color.B},{color.G}"
-                    };
+                        R = color.R,
+                        B= color.B,
+                        G= color.G
+                        };
 
                     var reuslt = colorsViewModelList.SingleOrDefault(x => x.Hue == model.Hue && x.Saturation == model.Saturation && x.Value == model.Value);
                     if (reuslt == null)
@@ -90,7 +95,12 @@ namespace RabbiBot_Backend.Data
                 
             }
 
-            return colorsViewModelList;
+            ImageResult imageResult= new ImageResult
+            {
+                ColorViewModels = colorsViewModelList,
+                Images =  obj
+            };
+            return imageResult;
         }
 
         private async Task<List<Colors>> GetColors()
@@ -99,6 +109,16 @@ namespace RabbiBot_Backend.Data
             var data = await client.DownloadStringTaskAsync($"https://localhost:44387/Colors/Get");
             var obj = JsonConvert.DeserializeObject<List<Colors>>(data);
             return obj;
+        }
+
+        public async Task<List<Colors>> GetColorByStatus(int statusId)
+        {
+            WebClient client = new WebClient();
+            var data = await client.DownloadStringTaskAsync($"https://localhost:44387/Colors/Get");
+            var colorsList = JsonConvert.DeserializeObject<List<Colors>>(data);
+            var xxx = colorsList.Where(x => x.Status == statusId).Take(15).ToList();
+            
+            return xxx;
         }
     }
 }

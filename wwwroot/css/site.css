@@ -349,3 +349,10 @@ th, td {
     background-color: dodgerblue;
     color: white;
 }
+
+
+#My_table1 {
+    
+    height: 100px !important;
+    overflow: auto;
+}

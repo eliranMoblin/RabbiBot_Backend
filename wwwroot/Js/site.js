@@ -1,17 +1,14 @@
 ﻿function TestDataTablesAdd(table) {
     $(document).ready(function () {
-        var tables=$(table).DataTable();
+        $(table).DataTable();
 
-        $('table tbody').on('click', 'tr', function () {
-           
-        });
     });
 }
 
 
 function TestDataTablesRemove(table) {
     $('table').DataTable().destroy();
-    
+
 }
 
 function HiedRow(id) {

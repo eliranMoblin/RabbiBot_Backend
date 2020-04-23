@@ -13,91 +13,77 @@
 @inject ColorsService ColorsService
 @inject Microsoft.AspNetCore.Components.NavigationManager navigationManager
 
-<div class="row">
-    <div class="col-md-4">
-        <form>
-            <div class="form-group">
-                <label for="Color" class="control-label">Image</label>
-                <img id="webcam" src="@imageEntity.Url" crossorigin="anonymous" class="img-thumbnail" />
-                <canvas id="canvas" width="640" height="480"></canvas>
-                <div class="ui">
-                    <div class="controls" style="display: none">
-                        <p>Click on the webcam feed to pick a color, then adjust tolerance.</p>
-                        <div>
-                            <label for="tolerance">Tolerance:</label>
-                            <input id="tolerance" type="range" value="50" max="255" min="0" step="1">
+@if (imageResult == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <form>
+                <div class="form-group">
+                    <label for="Color" class="control-label">Image</label>
+                    <img id="webcam" src="@imageEntity.Url" crossorigin="anonymous" class="img-thumbnail" />
+                    <canvas id="canvas" width="640" height="480"></canvas>
+                    <div class="ui">
+                        <div class="controls" style="display: none">
+                            <p>Click on the webcam feed to pick a color, then adjust tolerance.</p>
+                            <div>
+                                <label for="tolerance">Tolerance:</label>
+                                <input id="tolerance" type="range" value="50" max="255" min="0" step="1">
+                            </div>
                         </div>
+                        <div id="color"></div>
                     </div>
-                    <div id="color"></div>
+                </div>
+             
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+
+
+            <div class="card">
+                <div class="card-body">
+                    <table class="table table-bordered table-hover table-responsive" id="My_table2">
+                        <thead>
+                            <tr>
+                                <th>Color</th>
+                                <th>Hue</th>
+                                <th>Saturation</th>
+                                <th>Value</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in colorsViewModelList)
+                            {
+                                if (item.Hue < 330 || item.Hue > 20 && item.Saturation > 30)
+                                {
+                                    var id = $"{item.Hue}-{item.Saturation}-{item.Value}";
+                                    <tr id="@id">
+                                        <td style="background-color: rgb(@item.R,@item.G,@item.B)"></td>
+                                        <td>@item.Hue</td>
+                                        <td>@item.Saturation</td>
+                                        <td>@item.Value</td>
+                                        <td>
+                                            <button type="button" class="btn btn-primary" @onclick="@(async ()=> UpdateArticle(item, (int) Status.Clean,id))">Primary</button>
+                                            <button type="button" class="btn btn-light" @onclick="@(async ()=> UpdateArticle(item, (int) Status.NotKnow,id))">Light</button>
+                                            <button type="button" class="btn btn-danger" @onclick="@(async ()=> UpdateArticle(item, (int) Status.Dirty,id))">Danger</button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
                 </div>
             </div>
-
-            <div class="form-group">
-                <p>Current count: @colors.Count</p>
-            </div>
-            <div class="form-group">
-                <button type="button" class="btn btn-danger" @onclick="() => cancel()">Cancel</button>
-            </div>
-        </form>
+        </div>
     </div>
-</div>
-<div class="row">
-    <div class="col">
-        <table class="table table-bordered table-hover" id="My_table">
-            <thead>
-                <tr>
-                    <th>Color</th>
-                    <th>Hue</th>
-                    <th>Saturation</th>
-                    <th>Value</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-            @foreach (var item in colorsViewModelList)
-            {
-                if (item.Hue<330||item.Hue>20&&item.Saturation>30)
-                {
-                    var id = $"{item.Hue}-{item.Saturation}-{item.Value}";
-                <tr id="@id">
-                    <td style="background-color: rgb(@item.RBG)"></td>
-                    <td>@item.Hue</td>
-                    <td>@item.Saturation</td>
-                    <td>@item.Value</td>
-                    <td>
-                        <button type="button" class="btn btn-primary" @onclick="@(async ()=> UpdateArticle(item, (int) Status.Clean,id))">Primary</button>
-                        <button type="button" class="btn btn-light" @onclick="@(async ()=> UpdateArticle(item, (int) Status.NotKnow,id))">Light</button>
-                        <button type="button" class="btn btn-danger" @onclick="@(async ()=> UpdateArticle(item, (int) Status.Dirty,id))">Danger</button>
-                    </td>
-                </tr>
-                }
+}
 
-            }
-            @*@foreach (var item in prodQuery.Where(x => x.Value == 1))
-                {
-
-                    if (HSVColor.GetHSV(item.Key).Hue < 330 || HSVColor.GetHSV(item.Key).Hue > 20 && HSVColor.GetHSV(item.Key).Saturation > 30)
-                    {
-                        ConvertColor(item.Key);
-                        var id = $"{hue.ToString()}-{saturation.ToString()}-{value.ToString()}";
-                        <tr id="@id">
-                            <td style="background-color: rgb(@item.Key.R, @item.Key.B, @item.Key.G)"></td>
-                            <td>@Convert.ToInt32(HSVColor.GetHSV(item.Key).Hue)</td>
-                            <td>@Convert.ToInt32(@HSVColor.GetHSV(item.Key).Saturation)</td>
-                            <td>@Convert.ToInt32(@HSVColor.GetHSV(item.Key).Value)</td>
-
-                            <td>
-                                <button type="button" class="btn btn-primary" @onclick="@(async ()=> UpdateArticle(item.Key, (int) Status.Clean,id))">Primary</button>
-                                <button type="button" class="btn btn-light" @onclick="@(async ()=> UpdateArticle(item.Key, (int) Status.NotKnow,id))">Light</button>
-                                <button type="button" class="btn btn-danger" @onclick="@(async ()=> UpdateArticle(item.Key, (int) Status.Dirty,id))">Danger</button>
-                            </td>
-                        </tr>
-                    }
-                }*@
-            </tbody>
-        </table>
-    </div>
-</div>
 
 
 @code  {
@@ -121,36 +107,43 @@
     public string ID { get; set; }
 
     Images imageEntity = new Images();
-    List<Color> colors = new List<Color>();
-    Dictionary<Color, int> prodQuery = new Dictionary<Color, int>();
-    List<Colors> colorsList{ get; set; }
 
-
+    ImageResult imageResult;
     List<ColorViewModel> colorsViewModelList = new List<ColorViewModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Task.Delay(2000);
+        imageResult = await ColorsService.GetImageColor(Guid.Parse(ID));
+        imageEntity = imageResult.Images;
+        colorsViewModelList = imageResult.ColorViewModels;
+
+
+    }
+
+
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-    //colorsList = await ColorsService.Get();
-            await JsRuntime.InvokeVoidAsync("addDatePicker");
-            await JsRuntime.InvokeAsync<object>("TestDataTablesAdd", "#My_table");
-            imageEntity = await ImagesService.GetById(Guid.Parse(ID));
-            
+            //colorsList = await ColorsService.Get();
+            if (imageResult != null)
+            {
+                await JsRuntime.InvokeVoidAsync("addDatePicker");
+            }
         }
-    //
+
+        Task.Delay(2000);
+        await JsRuntime.InvokeAsync<object>("TestDataTablesAdd", "#My_table2");
+        //
     }
 
     void IDisposable.Dispose()
     {
-        JsRuntime.InvokeAsync<object>("TestDataTablesRemove", "#My_table");
+        JsRuntime.InvokeAsync<object>("TestDataTablesRemove", "#My_table2");
     }
 
-    protected override async Task OnInitializedAsync()
-    {
-
-        colorsViewModelList=await ColorsService.GetImageColor(Guid.Parse(ID));
-        
-    }
 
     protected async Task UpdateArticle(ColorViewModel color, int status, string id)
     {
@@ -196,7 +189,7 @@
     //                var xx = colorsList.SingleOrDefault(x => x.Hue == model.Hue && x.Saturation == model.Saturation && x.Value == model.Value);
     //                if (xx==null)
     //                {
-    //                    colorsViewModelList.Add(model);    
+    //                    colorsViewModelList.Add(model);
     //                }
 
 

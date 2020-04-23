@@ -43,6 +43,7 @@ namespace RabbiBot_Backend
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
             services.AddSingleton<ImagesService>();
             services.AddSingleton<ColorsService>();
+            services.AddScoped<BrowserService>();
             //services.AddCors(options =>
             //{
             //    options.AddDefaultPolicy(builder =>
