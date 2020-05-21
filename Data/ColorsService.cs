@@ -20,7 +20,7 @@ namespace RabbiBot_Backend.Data
         public async Task<List<Colors>> Get()
         {
             var client = new WebClient();
-            var data = await client.DownloadStringTaskAsync($"https://localhost:44387/Colors/Get");
+            var data = await client.DownloadStringTaskAsync($"https://alwayscleandaysserver.azurewebsites.net/Colors/Get");
             var obj = JsonConvert.DeserializeObject<List<Colors>>(data);
             return obj;
         }
@@ -43,7 +43,7 @@ namespace RabbiBot_Backend.Data
             using (HttpClient client = new HttpClient())
             {
                 var content = new StringContent(JsonConvert.SerializeObject(colors), Encoding.UTF8, "application/json");
-                var result = await client.PostAsync("https://localhost:44387/Colors/Update", content);
+                var result = await client.PostAsync("https://alwayscleandaysserver.azurewebsites.net/Colors/Update", content);
             }
             return null;
         }
@@ -53,7 +53,7 @@ namespace RabbiBot_Backend.Data
         {
 
             WebClient client = new WebClient();
-            var data = await client.DownloadStringTaskAsync($"https://localhost:44387/images/GetById/{id}");
+            var data = await client.DownloadStringTaskAsync($"https://alwayscleandaysserver.azurewebsites.net/images/GetById/{id}");
             var obj = JsonConvert.DeserializeObject<Images>(data);
             List<Colors> colorsList = await GetColors();
             var request = WebRequest.Create(obj.Url);
@@ -67,7 +67,7 @@ namespace RabbiBot_Backend.Data
                 for (var y = 0; y < bmp.Height; y++)
                 {
                     var color = bmp.GetPixel(x, y);
-                    ColorViewModel model = new ColorViewModel
+                    var model = new ColorViewModel
                     {
                         Hue = Convert.ToInt32(HSVColor.GetHSV(color).Hue),
                         Saturation = Convert.ToInt32(HSVColor.GetHSV(color).Saturation),
@@ -106,7 +106,7 @@ namespace RabbiBot_Backend.Data
         private async Task<List<Colors>> GetColors()
         {
             WebClient client = new WebClient();
-            var data = await client.DownloadStringTaskAsync($"https://localhost:44387/Colors/Get");
+            var data = await client.DownloadStringTaskAsync($"https://alwayscleandaysserver.azurewebsites.net/Colors/Get");
             var obj = JsonConvert.DeserializeObject<List<Colors>>(data);
             return obj;
         }
@@ -114,7 +114,7 @@ namespace RabbiBot_Backend.Data
         public async Task<List<Colors>> GetColorByStatus(int statusId)
         {
             WebClient client = new WebClient();
-            var data = await client.DownloadStringTaskAsync($"https://localhost:44387/Colors/Get");
+            var data = await client.DownloadStringTaskAsync($"https://alwayscleandaysserver.azurewebsites.net/Colors/Get");
             var colorsList = JsonConvert.DeserializeObject<List<Colors>>(data);
             var xxx = colorsList.Where(x => x.Status == statusId).Take(15).ToList();
             

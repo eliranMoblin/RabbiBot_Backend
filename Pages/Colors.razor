@@ -17,8 +17,8 @@
                     <form class="form-inline">
                         <div class="form-group">
                             <select class="form-control" bind="@selectedString" @onchange="DoStuff">
-                                <option value="0">-- Select Status --</option>
-                                @foreach (var template in Enum.GetValues(typeof(Status)))
+                                <option value="0">-- Select ColorStatus --</option>
+                                @foreach (var template in Enum.GetValues(typeof(ColorStatus)))
                                 {
                                     <option value=@template>@template</option>
                                 }
@@ -37,14 +37,14 @@
 
             <div class="card">
                 <div class="card-body">
-                    <table class="table table-bordered table-hover table-responsive" id="My_table1">
+                    <table class="table table-bordered table-hover " id="My_table1">
                         <thead>
                             <tr>
                                 <th>Color</th>
                                 <th>Hue</th>
                                 <th>Saturation</th>
                                 <th>Value</th>
-                                <th>Status</th>
+                                <th>ColorStatus</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -110,6 +110,6 @@
 
     private async Task DoStuff(ChangeEventArgs e)
     {
-        colors = await ColorsService.GetColorByStatus((int)Enum.Parse(typeof(Status), e.Value.ToString()));
+        colors = await ColorsService.GetColorByStatus((int)Enum.Parse(typeof(ColorStatus), e.Value.ToString()));
     }
 }

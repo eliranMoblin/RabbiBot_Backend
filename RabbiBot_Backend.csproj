@@ -13,6 +13,27 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="icon-512.png" />
+    <None Remove="service-worker.js" />
+    <None Remove="service-worker.published.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="icon-512.png">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="service-worker.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="service-worker.published.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Blazor.Extensions.Canvas" Version="1.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="3.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.1" />
@@ -28,6 +49,13 @@
     <Folder Include="Contracts\" />
     <Folder Include="NewFolder\" />
     <Folder Include="wwwroot\NewFolder\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\img\bike.svg" />
+    <None Include="wwwroot\img\logo.svg" />
+    <None Include="wwwroot\img\pizza-slice.svg" />
+    <None Include="wwwroot\img\user.svg" />
   </ItemGroup>
 
   <ItemGroup>

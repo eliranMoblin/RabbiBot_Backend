@@ -4,12 +4,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 16.0.29905.134
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RabbiBot_Backend", "RabbiBot_Backend.csproj", "{47BC52C6-B039-492B-AF52-6B2134353E33}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F5EC4698-22C6-4958-9113-8E6941334173} = {F5EC4698-22C6-4958-9113-8E6941334173}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "..\Common\Common.csproj", "{7474BE8A-2107-4D5C-A4A7-BB790210CE56}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server", "..\Server\Server.csproj", "{7429BD57-FF0B-45D4-A7D2-25B9EE49126C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Entity", "..\Entity\Entity.csproj", "{31100B6E-EA29-4382-AB2B-36EB2D717415}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RabbAi", "..\RabbAi\RabbAi.csproj", "{F5EC4698-22C6-4958-9113-8E6941334173}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +38,10 @@ Global
 		{31100B6E-EA29-4382-AB2B-36EB2D717415}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31100B6E-EA29-4382-AB2B-36EB2D717415}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31100B6E-EA29-4382-AB2B-36EB2D717415}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5EC4698-22C6-4958-9113-8E6941334173}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5EC4698-22C6-4958-9113-8E6941334173}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5EC4698-22C6-4958-9113-8E6941334173}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5EC4698-22C6-4958-9113-8E6941334173}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

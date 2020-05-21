@@ -15,7 +15,7 @@
 
 @if (imageResult == null)
 {
-    <p><em>Loading...</em></p>
+    <img src="/img/LOAD.gif" class="img-fluid" />
 }
 else
 {
@@ -37,7 +37,7 @@ else
                         <div id="color"></div>
                     </div>
                 </div>
-             
+
             </form>
         </div>
     </div>
@@ -47,33 +47,43 @@ else
 
             <div class="card">
                 <div class="card-body">
-                    <table class="table table-bordered table-hover table-responsive" id="My_table2">
+                    <table class="table table-bordered table-hover" id="My_table2">
                         <thead>
                             <tr>
                                 <th>Color</th>
                                 <th>Hue</th>
                                 <th>Saturation</th>
                                 <th>Value</th>
-                                <th>Status</th>
+                                <th>ColorStatus</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var item in colorsViewModelList)
                             {
-                                if (item.Hue < 330 || item.Hue > 20 && item.Saturation > 30)
+                                if (item.Hue < 330 || item.Hue > 20 && item.Hue < 290 && item.Saturation > 30 && item.Value > 40)
                                 {
-                                    var id = $"{item.Hue}-{item.Saturation}-{item.Value}";
-                                    <tr id="@id">
-                                        <td style="background-color: rgb(@item.R,@item.G,@item.B)"></td>
-                                        <td>@item.Hue</td>
-                                        <td>@item.Saturation</td>
-                                        <td>@item.Value</td>
-                                        <td>
-                                            <button type="button" class="btn btn-primary" @onclick="@(async ()=> UpdateArticle(item, (int) Status.Clean,id))">Primary</button>
-                                            <button type="button" class="btn btn-light" @onclick="@(async ()=> UpdateArticle(item, (int) Status.NotKnow,id))">Light</button>
-                                            <button type="button" class="btn btn-danger" @onclick="@(async ()=> UpdateArticle(item, (int) Status.Dirty,id))">Danger</button>
-                                        </td>
-                                    </tr>
+                                    if (item.Hue > 170 && item.Hue < 330)
+                                    {
+                                        if (item.Value > 40)
+                                        {
+                                            if (item.Saturation > 19)
+                                            {
+                                                var id = $"{item.Hue}-{item.Saturation}-{item.Value}";
+                                                <tr id="@id">
+                                                    <td style="background-color: rgb(@item.R,@item.G,@item.B)"></td>
+                                                    <td>@item.Hue</td>
+                                                    <td>@item.Saturation</td>
+                                                    <td>@item.Value</td>
+                                                    <td>
+                                                        <button type="button" class="btn btn-primary" @onclick="@(async ()=> UpdateArticle(item, (int) ColorStatus.Clean,id))">Clean</button>
+                                                        <button type="button" class="btn btn-light" @onclick="@(async ()=> UpdateArticle(item, (int) ColorStatus.NotKnow,id))">Not Know</button>
+                                                        <button type="button" class="btn btn-danger" @onclick="@(async ()=> UpdateArticle(item, (int) ColorStatus.Dirty,id))">Dirty</button>
+                                                    </td>
+                                                </tr>
+
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         </tbody>
@@ -155,108 +165,6 @@ else
     {
         navigationManager.NavigateTo("/fetchdata");
     }
-
-    //private async Task<int> CountImageColors(string fileName)
-    //{
-
-    //    var request = WebRequest.Create(fileName);
-    //    var response = request.GetResponse();
-    //    var responseStream = response.GetResponseStream();
-    //    Bitmap bmp = new Bitmap(responseStream);
-
-
-    //    for (int x = 0; x < bmp.Width; x++)
-    //    {
-    //        for (int y = 0; y < bmp.Height; y++)
-    //        {
-    /////colors.Add(bmp.GetPixel(x, y));
-    //            var color = bmp.GetPixel(x, y);
-    //            ColorViewModel model = new ColorViewModel
-    //            {
-    //                Hue = Convert.ToInt32(HSVColor.GetHSV(color).Hue),
-    //                Saturation = Convert.ToInt32(HSVColor.GetHSV(color).Saturation),
-    //                Value = Convert.ToInt32(HSVColor.GetHSV(color).Value),
-    //                RBG = $"{color.R},{color.B},{color.G}"
-
-    //            };
-
-    ////var alreadyExist=  colorsViewModelList.Contains(model);'
-    //            var reuslt = colorsViewModelList.SingleOrDefault(x => x.Hue == model.Hue && x.Saturation == model.Saturation && x.Value == model.Value);
-    //            if (reuslt==null)
-    //            {
-
-    //                var ccc = colorsList;
-    //                var xx = colorsList.SingleOrDefault(x => x.Hue == model.Hue && x.Saturation == model.Saturation && x.Value == model.Value);
-    //                if (xx==null)
-    //                {
-    //                    colorsViewModelList.Add(model);
-    //                }
-
-
-    //            }
-
-    //        }
-    ////break;
-    //    }
-
-    //    return colors.Count;
-    ////var groups = colorsViewModelList.GroupBy(s => s).Select(
-    ////    s => new { Color = s.Key, Count = s.Count() }).ToList();
-
-
-    ////var xxx = groups.Where(x => x.Count == 1).ToList();
-
-    ////prodQuery = xxx.ToDictionary(g => g.Color, g => g.Count);
-
-
-    ////prodQuery =
-    ////   from prod in colors
-    ////   group prod by prod.R into grouping
-    ////   select grouping;
-
-    ////var result = from color in colors
-    ////             group color by color.R
-    ////    into colorGroup
-    ////             select new
-    ////             {
-    ////                 R = colorGroup.Key,
-    ////                 Count = colorGroup.Count()
-    ////             };
-
-    ////var  results = colors
-    ////      .GroupBy(n => n.R)
-    ////      .Select(n => new
-    ////      {
-    ////          MetricName = n.Key,
-    ////          MetricCount = n.Count()
-    ////      }
-    ////      )
-    ////      .OrderBy(n => n.MetricName);
-
-    ////results = colors.GroupBy(x => x)
-    ////    .ToDictionary(g => g.Key, g => g.Count());
-    ////results = colors.GroupBy(s => s).Select(g => new { Color = g.Key, Count = g.Count() });
-
-    ////int x = 0;
-    ////for ( x < bmp.Size.Width; x++)
-    ////{
-    ////    for (int y = 0; y > bmp.Size.Height; y++)
-    ////    {
-
-    ////        try
-    ////        {
-
-    ////        }
-    ////        catch (Exception)
-    ////        {
-    ////        }
-    ////    }
-    ////}
-
-    //}
-
-
-
 
 
 }

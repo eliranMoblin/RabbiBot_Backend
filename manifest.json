@@ -1,0 +1,15 @@
+{
+  "name": "RabbAi",
+  "short_name": "RabbAi",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0366d6",
+  "icons": [
+    {
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}

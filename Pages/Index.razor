@@ -4,7 +4,11 @@
 @inject BrowserService Service
 @inject IJSRuntime JsRuntime
 
-<div class="container-fluid">
+
+
+@*<img id="webcam" src="https://gomoblinportal.blob.core.windows.net/test/test/7603108b-4c4b-46f4-b0ec-6ceddbd3e64e" crossorigin="anonymous" class="img-thumbnail" />*@
+
+@*<div class="container-fluid">
     
 
 
@@ -12,7 +16,7 @@
     <p>Window Width: @Width</p>
 
     <button @onclick="GetDimensions">Get Dimensions</button>
-</div>
+</div>*@
 
 @code
 {
@@ -35,7 +39,7 @@
     {
         if (firstRender)
         {
-            await JsRuntime.InvokeVoidAsync("addDatePicker");
+         //   await JsRuntime.InvokeVoidAsync("addDatePicker");
         }
 
         //this._context = await this._canvasReference.CreateCanvas2DAsync();
